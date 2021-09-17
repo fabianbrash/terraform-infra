@@ -1,0 +1,31 @@
+locals {
+    dc                      = "LAB"
+    cluster                 = "LAB-CLUSTER"
+    datastore               = "vSAN"
+    cpu_count               = "2"
+    memory                  = "8192"
+    network                 = "My-PG"
+    template                = "my-Template"
+    firmware                = "efi"
+    vmname                  = "terraform-test"
+}
+
+
+variable "user" {
+    description = "vCenter user"
+    type        = string
+    default     = "Administrator@vsphere.local"
+}
+
+variable "password" {
+    description = "vCenter password"
+    type        = string
+    default     = "123456789"
+}
+
+
+variable "vcenter" {
+    description = "vCenter server FQDN"
+    type        = string
+    default     = "vc.local"
+}
