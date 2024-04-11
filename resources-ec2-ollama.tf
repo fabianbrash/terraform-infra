@@ -55,6 +55,8 @@ resource "aws_key_pair" "deployer" {
 resource "aws_instance" "example_ec2" {
   ami           = "ami-08116b9957a259459" # Replace with the actual AMI ID for Ubuntu 22.04 in your region
   instance_type = "t2.2xlarge"
+  #instance_type = "g4ad.xlarge"  AMD GPU
+  #instance_type = "g3s.xlarge" NVIDIA GPU
   subnet_id     = aws_subnet.example_subnet.id
   vpc_security_group_ids = [aws_security_group.allow_ssh.id]
   #associate_public_ip_address = true   Request a public IP address
