@@ -63,8 +63,10 @@ resource "aws_instance" "example_ec2" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt-get update && apt-get upgrade -y && curl -fsSL https://ollama.com/install.sh | sh
-              su -c '{ ollama serve & }; sleep 15; ollama pull llama2' ubuntu
+              sudo apt-get update && sudo apt-get upgrade -y && sudo curl -fsSL https://ollama.com/install.sh | sh
+              sudo systemctl start ollama
+              sudo systemctl enable ollama
+              ollama pull llama2
               EOF
   
    root_block_device {
