@@ -14,6 +14,7 @@ resource "azurerm_app_service_plan" "example" {
   }
 }
 
+
 resource "azurerm_app_service" "example" {
   name                = "fb-example-terra252-appservice"
   location            = azurerm_resource_group.example.location
@@ -49,8 +50,41 @@ resource "azurerm_storage_share" "example_file_share" {
   quota                = 50
 }
 
+
+resource "azurerm_storage_account" "nfs_storage" {
+  name                     = "examplesanfs${random_string.random_id.result}"
+  resource_group_name      = azurerm_resource_group.example.name
+  location                 = azurerm_resource_group.example.location
+  account_tier             = "Premium"
+  account_replication_type = "LRS"
+  account_kind             = "FileStorage"  # This is crucial for premium file shares
+  enable_https_traffic_only = false
+
+  tags = {
+    environment = "testing"
+  }
+}
+
+
+resource "azurerm_storage_share" "nfs_share" {
+  name                 = "mynfsshare"
+  storage_account_name = azurerm_storage_account.nfs_storage.name
+  quota                = 1024  # Set quota for 1 TB
+
+  enabled_protocol = "NFS"
+
+  #root_squash_enabled = true
+}
+
+
 resource "random_string" "example_sa_suffix" {
-  length  = 8
+  length  = 6
+  special = false
+  upper   = false
+}
+
+resource "random_string" "random_id" {
+  length  = 6
   special = false
   upper   = false
 }
