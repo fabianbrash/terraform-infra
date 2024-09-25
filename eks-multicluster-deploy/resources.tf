@@ -1,5 +1,5 @@
 resource "random_pet" "cluster_name" {
-  count = 3
+  count = var.count
 }
 
 resource "aws_vpc" "eks_vpc" {
@@ -11,7 +11,7 @@ resource "aws_vpc" "eks_vpc" {
 }
 
 resource "aws_subnet" "eks_public_subnet" {
-  count = 3
+  count = var.count
   vpc_id                  = aws_vpc.eks_vpc.id
   cidr_block              = cidrsubnet(aws_vpc.eks_vpc.cidr_block, 8, count.index)
   availability_zone       = element(data.aws_availability_zones.available.names, count.index)
@@ -44,7 +44,7 @@ resource "aws_route_table" "eks_public_route_table" {
 }
 
 resource "aws_route_table_association" "eks_public_subnet_association" {
-  count          = 3
+  count          = var.count
   subnet_id      = aws_subnet.eks_public_subnet[count.index].id
   route_table_id = aws_route_table.eks_public_route_table.id
 }
@@ -63,7 +63,7 @@ resource "aws_eip" "eks_nat_eip" {
 }
 
 resource "aws_subnet" "eks_private_subnet" {
-  count = 3
+  count = var.count
   vpc_id            = aws_vpc.eks_vpc.id
   cidr_block        = cidrsubnet(aws_vpc.eks_vpc.cidr_block, 8, count.index + 3)
   availability_zone = element(data.aws_availability_zones.available.names, count.index)
@@ -87,7 +87,7 @@ resource "aws_route_table" "eks_private_route_table" {
 }
 
 resource "aws_route_table_association" "eks_private_subnet_association" {
-  count          = 3
+  count          = var.count
   subnet_id      = aws_subnet.eks_private_subnet[count.index].id
   route_table_id = aws_route_table.eks_private_route_table.id
 }
@@ -111,7 +111,7 @@ data "aws_eks_addon_version" "vpc_cni" {
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
-  count           = 3
+  count           = var.count
   name            = "${random_pet.cluster_name[count.index].id}-eks-cluster"
   role_arn        = aws_iam_role.eks_cluster_role.arn
   version         = "1.29" # Specify the Kubernetes version for the EKS cluster
@@ -125,7 +125,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 }
 
 resource "aws_eks_node_group" "eks_node_group" {
-  count           = 3
+  count           = var.count
   cluster_name    = aws_eks_cluster.eks_cluster[count.index].name
   node_group_name = "pool-1"
   node_role_arn   = aws_iam_role.eks_node_group_role.arn
@@ -134,7 +134,7 @@ resource "aws_eks_node_group" "eks_node_group" {
 
   scaling_config {
     desired_size = 1
-    max_size     = 2
+    max_size     = var.count
     min_size     = 1
   }
 
@@ -202,7 +202,7 @@ resource "aws_iam_role_policy_attachment" "eks_node_AmazonEKS_CNI_Policy" {
 data "aws_availability_zones" "available" {}
 
 resource "aws_eks_addon" "coredns_addon" {
-  count = 3
+  count = var.count
   cluster_name   = aws_eks_cluster.eks_cluster[count.index].name
   addon_name     = "coredns"
   addon_version  = data.aws_eks_addon_version.coredns.version
@@ -210,7 +210,7 @@ resource "aws_eks_addon" "coredns_addon" {
 }
 
 resource "aws_eks_addon" "ebs_csi_driver_addon" {
-  count = 3
+  count = var.count
   cluster_name   = aws_eks_cluster.eks_cluster[count.index].name
   addon_name     = "aws-ebs-csi-driver"
   addon_version  = data.aws_eks_addon_version.ebs_csi_driver.version
@@ -218,7 +218,7 @@ resource "aws_eks_addon" "ebs_csi_driver_addon" {
 }
 
 resource "aws_eks_addon" "vpc_cni_addon" {
-  count = 3
+  count = var.count
   cluster_name   = aws_eks_cluster.eks_cluster[count.index].name
   addon_name     = "vpc-cni"
   addon_version  = data.aws_eks_addon_version.vpc_cni.version
